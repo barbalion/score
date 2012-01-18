@@ -5,7 +5,7 @@ import util.matching.Regex
 import java.io.{FileInputStream, File}
 import xml.{Elem, XML}
 
-class XmlStorage[E <: Entity](objectContext: Context[E], aFileMask: String, elemSelector: Elem => List[Elem], implicit val aContext: Context[Storage[E]])
+class XmlStorage[E <: Entity](objectContext: Context[E], aFileMask: String, elemSelector: Elem => Seq[Elem])(implicit context: Context[Storage[E]])
   extends Storage[E](objectContext) with PreloadedStorage[E] with ReadOnlyStorage[E] {
 
   val fileMask = aFileMask;
