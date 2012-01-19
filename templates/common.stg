@@ -1,0 +1,160 @@
+group common;
+
+typeSQLtoJAVA ::= [
+    "Integer": "Integer",
+    "Long": "Long",
+    "String": "String",
+    "Clob": "String",
+    "Blob": "BlobByteArray",
+    "Date" : "Date",
+    "Timestamp": "Timestamp",
+    "BigDecimal" : "BigDecimal",
+    "Double" : "Double",
+    "Float" : "Float",
+    "Boolean" : "Boolean",
+    "Bitmask" : "Bitmask",
+    "FilePath" : "FilePath",
+    "Variant" : "Variant",
+    "Rgb" : "Rgb",
+    default: "unknown"
+]
+
+typeJAVAtoSQLTYPE ::= [
+    "Integer": "Types.INTEGER",
+    "Long": "Types.BIGINT",
+    "String": "Types.VARCHAR",
+    "Date" : "Types.DATE",
+    "Timestamp": "Types.TIMESTAMP",
+    "Blob": "Types.BLOB",
+    "BigDecimal" : "Types.BIGINT",
+    "Double" : "Types.DOUBLE",
+    "Float" : "Types.FLOAT",
+    "Boolean" : "Types.BOOLEAN",
+    "Bitmask" : "Types.BIGINT",
+    "FilePath" : "Types.VARCHAR",
+    "Variant" : "Types.VARCHAR",
+    "Rgb" : "Types.INTEGER",
+    default: "unknown"
+]
+
+typeJAVAtoSQL ::= [
+    "Integer": "numeric",
+    "Long": "numeric",
+    "String": "string",
+    "Clob": "string",
+    "Blob": "blob",
+    "Date" : "date",
+    "Timestamp": "timestamp",
+    "BigDecimal" : "numeric",
+    "Double" : "double",
+    "Float" : "float",
+    "Boolean" : "numeric",
+    "Bitmask" : "numeric",
+    "FilePath" : "string",
+    "Variant" : "string",
+    "Rgb" : "numeric",
+    default: "unknown"
+]
+
+typeJAVAtoRPL ::= [
+    "Integer": "numeric",
+    "Long": "bigint",
+    "String": "string",
+    "Clob": "memo",
+    "Blob": "blob",
+    "Date" : "date",
+    "Timestamp": "datetime",
+    "BigDecimal" : "numeric",
+    "Double" : "double",
+    "Float" : "float",
+    "Boolean" : "numeric",
+    "Bitmask" : "numeric",
+    "FilePath" : "string",
+    "Variant" : "string",
+    "Rgb" : "numeric",
+    default: "unknown"
+]
+
+typeSQLtoSTMT ::= [
+    "Integer": "Int",
+    "Long": "Long",
+    "String": "String",
+    "Clob": "String",
+    "Blob": "Blob",
+    "Date" : "Date",
+    "Timestamp": "Timestamp",
+    "BigDecimal" : "BigDecimal",
+    "Double" : "Double",
+    "Float" : "Float",
+    "Boolean" : "Boolean",    
+    "Bitmask" : "Long",
+    "FilePath" : "String",
+    "Variant" : "String",
+    "Rgb" : "Int",
+    default: "unknown"
+]
+
+rangeCap ::= [
+    "From": " с",
+    "To": " по",
+    default: ""
+]
+
+FILTER(list,field,map) ::= <<
+<list:CALL(map=map,key={<it.(field)>},item=it)>
+>>
+
+CALL(map,key,item) ::= <<
+<((map)(key))(item)>
+>>
+
+// this template used by CodeMaker to determine file path for writing generated classes
+// override this template in underlying template groups in case of change base class package
+PackageName(package, o) ::= <<
+<package>
+>>
+
+Name(o) ::= <<
+<o.name; format="firstcap">
+>>
+
+JavaName(name) ::= <<
+<name:javaname():FirstCap()>
+>>
+
+javaname(name) ::= <<
+<name; format="javaname">
+>>
+
+cname(name) ::= <<
+<name; format="cname">
+>>
+
+replace(s) ::= <<
+<s; format="replace">
+>>
+
+Replace(s) ::= <<
+<s:replace()>
+>>
+
+FirstCap(name) ::= <<
+<name; format="firstcap">
+>>
+
+lowercase(s) ::= <<
+<s; format="lowercase">
+>>
+
+LowerCase(s) ::= <<
+<s:lowercase()>
+>>
+
+uppercase(s) ::= <<
+<s; format="uppercase">
+>>
+
+UpperCase(s) ::= <<
+<s:uppercase()>
+>>
+
