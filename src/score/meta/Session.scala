@@ -1,4 +1,4 @@
-package scoro.meta
+package score.meta
 
 import collection.mutable.HashMap
 import java.util.{Locale, UUID}

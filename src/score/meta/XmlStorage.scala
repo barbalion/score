@@ -1,46 +1,57 @@
-package scoro.meta
+package score.meta
 
-import collection.immutable.Stream
 import util.matching.Regex
 import java.io.{FileInputStream, File}
 import xml.{Elem, XML}
 
-class XmlStorage[E <: Entity](objectContext: Context[E], aFileMask: String, elemSelector: Elem => Seq[Elem])(implicit context: Context[Storage[E]])
-  extends Storage[E](objectContext) with PreloadedStorage[E] with ReadOnlyStorage[E] {
+class XmlStorage(objectContext: Context,
+                              aFileMask: String,
+                              elemSelector: Elem => Seq[Elem])
+                             (implicit context: Context)
+  extends Storage(context) with PreloadedStorage with ReadOnlyStorage
+{
 
   val fileMask = aFileMask;
 
-  override def loadObject(o: E) {
+  def loadObject(o: Entity) {
     val found = (preloaded find (_ == o)).getOrElse({sys.error("Object not found: " + o);})
     o.assignFrom(found)
   }
 
   private def convertFileMaskToRegex(mask: String): String = {
-    ("^" + mask.replaceAll("[\\.\\(\\)\\+]", "\\$1").replaceAll("*", ".*").replaceAll("?", ".") + "$") // replace wilcards
+    ("^" + mask.replaceAll("([\\.\\(\\)\\+])", "\\\\$1").replaceAllLiterally("*", ".*").replaceAllLiterally("?", ".") + "$") // replace wilcards
       .replaceAllLiterally("^.*", "").replaceAllLiterally(".*$", "") // remove ignorant sequences
   }
 
   private def allFiles: Array[File] = {
     // prepare search params
     val f: File = new File(fileMask)
-    val root = if (f.isDirectory) f else new File(f.getPath)
+    val root = if (f.isDirectory) f else new File(if (f.getParent == null) "." else f.getParent)
     val mask = new Regex(if (f.isDirectory) "\\.xml$" else convertFileMaskToRegex(f.getName))
 
     // find all files
     def findFiles(f: File): Array[File] = {
       val files = f.listFiles()
-      files filter (_.isDirectory) map (findFiles) reduceLeft (_ ++ _)
-      files filter (x => (!x.isDirectory && (mask.findFirstIn(x.getName).isDefined)))
+      val filteredFiles = files filter (x => (!x.isDirectory && (mask.findFirstIn(x.getName).isDefined)))
+      (files filter (_.isDirectory) map (findFiles) foldLeft(filteredFiles)) (_ ++ _)
     }
     findFiles(root) filter (_.canRead)
   }
 
-  protected def createEntityFromElem(el: Elem) = {
-    val metaO = (context.model.entities find (_.xmlName == el.label))
-    if (metaO.isEmpty)
-      sys.error("Metadata for \"%s\" element not found." format(el.label))
-    val meta = metaO.get
-    meta.newObjectFromXml(el)(context)
+  protected def entityMetaFromElem(el: Elem) = {
+    (objectContext.model.entities find (_.xmlName == el.label)).getOrElse(sys.error("Metadata for \"%s\" element not found." format (el.label)))
+  }
+
+  def createEntityFromElem(el: Elem) = {
+    val meta = entityMetaFromElem(el)
+    val o = meta.newObject(objectContext)
+    meta.properties map (p => {
+      if (p.isInstanceOf[XmlSerializableProperty[Entity, Any]])
+        p.asInstanceOf[XmlSerializableProperty[Entity, Any]].setFromXml(o, el)
+      else
+        sys.error("Property does not support xml serialization: %s" format (p.toString))
+    })
+    o
   }
 
   override protected def objects() = synchronized({
@@ -53,6 +64,6 @@ class XmlStorage[E <: Entity](objectContext: Context[E], aFileMask: String, elem
     })
 
     // concatenate all streams into one
-    xmlStreams map (_.asInstanceOf[Stream[E]]) reduceLeft (_ ++ _)
+    xmlStreams reduceLeft (_ ++ _)
   })
 }

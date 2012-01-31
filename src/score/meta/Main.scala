@@ -1,4 +1,4 @@
-package scoro.meta
+package score.meta
 
 object Test extends App {
   Console.println("sdfsdf");

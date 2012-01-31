@@ -1,21 +1,10 @@
-package scoro.meta
+package score.meta
 
-import xml.Elem
+abstract class EntityMeta[E <: Entity](implicit context: Context) extends MetaObject {
 
-abstract class EntityMeta[E <: Entity](implicit context: Context[EntityMeta[E]]) extends MetaObject {
-  private var fProps: List[EntityProperty[E, Any]] = Nil;
+  var properties: List[EntityProperty[Entity, Any]] = Nil;
 
-  def properties = fProps;
-
-  protected def properties_=(aProps: List[EntityProperty[E, Any]]) {fProps = aProps}
-
-  def newObject(implicit objectContext: Context[E]): E;
-
-  def newObjectFromXml(el: Elem)(implicit objectContext: Context[E]) = {
-    val o = newObject
-
-    o
-  }
+  def newObject(implicit objectContext: Context): E;
 
   def key = properties filter (_.isKey)
 
@@ -24,28 +13,21 @@ abstract class EntityMeta[E <: Entity](implicit context: Context[EntityMeta[E]])
   }
 }
 
-class RunTimeEntityMetaMeta(implicit context: Context[Nothing]) extends EntityMeta[EntityMeta[Nothing]] {
-  def newObject(implicit objectContext: Context[EntityMeta[Nothing]]) = new RunTimeEntityMetaMeta() {
-    def newObject(implicit objectContext: Context[Nothing]) = {sys.error("Unsupported")}
-  }.asInstanceOf[EntityMeta[Nothing]]
-
-  name = "Entity Meta"
-  properties =
-    new StringField[EntityMeta[Nothing]] {
-      name = "Name"
-      def getFrom(o: EntityMeta[Nothing]) = o.name
-      def setTo(o: EntityMeta[Nothing], v: String) {o.name = v}
-    } ::
-    new StringField[EntityMeta[Nothing]] {
-      name = "Caption"
-      def getFrom(o: EntityMeta[Nothing]) = o.caption
-      def setTo(o: EntityMeta[Nothing], v: String) {o.caption = v}
-    } ::
-      Nil map (_.asInstanceOf[EntityProperty[EntityMeta[Nothing], Any]])
-
+trait AbstractEntityMeta[E <: Entity] extends EntityMeta[E] {
+  override def newObject(implicit objectContext: Context): E = {sys.error("Operation not supported for abstract class")}
 }
 
 
-object EntityMetaMeta extends RunTimeEntityMetaMeta()(RunTimeModelContext) {
-  RunTimeModel.registerEntity(this)
+class EntityMetaMeta(implicit context: Context) extends MetaObjectMeta {
+  override def newObject(implicit objectContext: Context) = new EntityMeta[Entity]()(objectContext) {
+    def newObject(implicit objectContext: Context) = new RunTimeEntity(this)(objectContext)
+  };
+}
+
+object EntityMetaMeta extends EntityMetaMeta()(CompiledModelContext) {
+  name = "Entity Meta"
+  override def xmlName = "Entity"
+
+  CompiledModel.registerEntity(this)
+
 }

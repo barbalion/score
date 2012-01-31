@@ -1,7 +1,7 @@
-package scoro.meta;
+package score.meta;
 
-trait PreloadedStorage[A <: Entity] extends Storage[A] {
-  private var preloadedObjects: Seq[A] = null;
+trait PreloadedStorage extends Storage {
+  private var preloadedObjects: Seq[Entity] = null;
 
   def preloaded = {
     synchronized({
@@ -12,15 +12,20 @@ trait PreloadedStorage[A <: Entity] extends Storage[A] {
     preloadedObjects
   }
 
-  override def list(entityMeta: EntityMeta[A], condition: Condition, sorting: EntitySorting) = {
-    val allObjectsOfA = preloaded filter (_.meta.name == entityMeta.name) map (_.asInstanceOf[A])
+
+  def list[E <: Entity](entityMeta: EntityMeta[E], condition: Condition, sorting: EntitySorting) = {
+    val allObjectsOfA = preloaded filter (
+      _.meta.name == entityMeta.name
+      ) map (_.asInstanceOf[Entity])
 
     val filteredObjects = if (condition == null) allObjectsOfA else allObjectsOfA filter (condition.check(_))
 
-    if (sorting == null) filteredObjects else filteredObjects sortWith (sorting.compareObjects(_, _) < 0)
+    val sortedObjects = if (sorting == null) filteredObjects else filteredObjects sortWith (sorting.compareObjects(_, _) < 0)
+
+    sortedObjects map (_.asInstanceOf[E])
   }
 
   protected def reset() {preloadedObjects = null}
 
-  protected def objects(): Seq[A];
+  protected def objects(): Seq[Entity];
 }

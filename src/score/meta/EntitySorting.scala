@@ -1,4 +1,4 @@
-package scoro.meta
+package score.meta
 
 abstract class EntitySorting() {
   def compareObjects[A <: Entity](x1: A,  x2: A): Int

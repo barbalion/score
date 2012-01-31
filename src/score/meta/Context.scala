@@ -1,18 +1,24 @@
-package scoro.meta
+package score.meta
 
-abstract class Context[+E <: Entity](val model: Model, val session: Session, aStorage: Storage[E]) {
-  val storage = aStorage.asInstanceOf[Storage[Entity]]
+abstract class Context(val model: Model, val session: Session, val storage: Storage) {
+}
+
+class ModelLoadingContext(aStorage: Storage) extends Context(null, SystemSession, aStorage) {
 
 }
 
-class ModelLoadingContext(aStorage: Storage[MetaObject]) extends Context[MetaObject](null, SystemSession, aStorage) {
+object SystemContext extends Context(null, SystemSession, new NullStorage) {
 
 }
 
-object SystemContext extends Context[Nothing](null, SystemSession, new NullStorage[Nothing]) {
-
-}
-
-object RunTimeModelContext extends Context[Nothing](RunTimeModel, SystemSession, new NullStorage[Nothing]) {
+object CompiledModelContext extends Context(CompiledModel, SystemSession, new NullStorage) {
+  {
+    // init model
+    (
+      EntityMetaMeta,
+      StringFieldMeta,
+      IntegerFieldMeta,
+      null)
+  }
 
 }

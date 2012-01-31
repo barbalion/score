@@ -1,6 +1,8 @@
-package scoro.meta
+package score.meta
 
-abstract class Entity(implicit val context: Context[Entity]) {
+import collection.mutable.HashMap
+
+abstract class Entity(implicit val context: Context) {
 
   private var fNew = false;
   def isNew = fNew;
@@ -25,6 +27,7 @@ abstract class Entity(implicit val context: Context[Entity]) {
   };
   
   def apply(fieldName: String) = meta.fieldByName(fieldName).getFrom(this)
+  def update(fieldName: String, v: Any) {meta.fieldByName(fieldName).setTo(this, v)}
 
   def load() {
     checkKeyAssigned()
@@ -59,5 +62,23 @@ trait ReadOnlyEntity extends Entity {
 trait WriteOnlyEntity extends Entity {
   override def load() {
     throw new IllegalOperation("Trying to load write-only object.");
+  }
+}
+
+trait DynamicEntity extends Entity {
+  protected val values = new HashMap[String, Any]
+
+  override def apply(fieldName: String) = applyDynamic(fieldName)
+  override def update(fieldName: String, v: Any) {updateDynamic(fieldName, v)}
+
+  def applyDynamic(fieldName: String) = values(fieldName)
+  def updateDynamic(fieldName: String, v: Any) {values.put(fieldName, v)}
+}
+
+class RunTimeEntity(aMeta: EntityMeta[Entity])(implicit context: Context) extends Entity {
+  def meta = aMeta
+
+  protected def validate() {
+    // todo
   }
 }

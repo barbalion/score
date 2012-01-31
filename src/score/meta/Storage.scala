@@ -1,37 +1,37 @@
-package scoro.meta
+package score.meta
 
-abstract class Storage[E <: Entity](protected val objectContext: Context[E])(implicit context: Context[Storage[E]]) extends MetaObject {
+abstract class Storage(protected val objectContext: Context)(implicit context: Context) extends MetaObject {
 
-  def list(entityMeta: EntityMeta[E], condition: Condition, sorting: EntitySorting): Seq[E]
+  def list[E <: Entity](entityMeta: EntityMeta[E], condition: Condition, sorting: EntitySorting): Seq[E]
   
-  def loadObject(o: E);
+  def loadObject(o: Entity);
 
-  def insertObject(o: E);
+  def insertObject(o: Entity);
 
-  def updateObject(o: E);
+  def updateObject(o: Entity);
 
-  def deleteObject(o: E);
-
+  def deleteObject(o: Entity);
 }
 
-trait ReadOnlyStorage[E <: Entity] extends Storage[E] {
+trait ReadOnlyStorage extends Storage {
   protected def operationNotSupported = {sys.error("Operation is not supported for read-only storage.")}
 
-  def deleteObject(o: E) {operationNotSupported}
 
-  def insertObject(o: E) {operationNotSupported}
+  override def deleteObject(o: Entity) {operationNotSupported}
 
-  def updateObject(o: E) {operationNotSupported}
+  override def insertObject(o: Entity) {operationNotSupported}
+
+  override def updateObject(o: Entity) {operationNotSupported}
 }
 
-trait WriteOnlyStorage[E <: Entity] extends Storage[E] {
+trait WriteOnlyStorage extends Storage{
   protected def operationNotSupported = {sys.error("Operation is not supported for write-only storage.")}
 
-  def list(entityMeta: EntityMeta[E], condition: Condition, sorting: EntitySorting) = {operationNotSupported}
+  override def list[E <: Entity](entityMeta: EntityMeta[E], condition: Condition, sorting: EntitySorting) = {operationNotSupported}
 
-  def loadObject(o: E) {operationNotSupported}
+  override def loadObject(o: Entity) {operationNotSupported}
 }
 
-class NullStorage[E <: Entity] extends Storage[E](null)(null) with ReadOnlyStorage[E] with WriteOnlyStorage[E] {
+class NullStorage extends Storage(null)(null) with ReadOnlyStorage with WriteOnlyStorage {
   protected override def operationNotSupported = {sys.error("Operation is not supported for null-storage.")}
 }
