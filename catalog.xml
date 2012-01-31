@@ -1,6 +1,8 @@
 <Model>
-  <Entity name="Test">
-    <String name="F1"/>
-    <String name="F2"/>
-  </Entity>
+	<Entity name="Test">
+		<Fields>
+			<String name="F1"/>
+			<String name="F2"/>
+		</Fields>
+	</Entity>
 </Model>

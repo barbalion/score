@@ -14,9 +14,7 @@ trait PreloadedStorage extends Storage {
 
 
   def list[E <: Entity](entityMeta: EntityMeta[E], condition: Condition, sorting: EntitySorting) = {
-    val allObjectsOfA = preloaded filter (
-      _.meta.name == entityMeta.name
-      ) map (_.asInstanceOf[Entity])
+    val allObjectsOfA = preloaded filter (_.meta.name == entityMeta.name) map (_.asInstanceOf[Entity])
 
     val filteredObjects = if (condition == null) allObjectsOfA else allObjectsOfA filter (condition.check(_))
 

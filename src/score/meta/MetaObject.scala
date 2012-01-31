@@ -11,8 +11,6 @@ abstract class MetaObject(implicit context: Context) extends Entity with XmlSeri
 
   protected def formatSourceName(s: String) = MetaObject.formatSourceName(s)
 
-  override def meta = null;
-
   override def validate() {};
 
   override def xmlName = MetaObject.formatXmlName(name);
@@ -46,19 +44,19 @@ object MetaObject {
 
 }
 
-class MetaObjectMeta(implicit context: Context) extends EntityMeta[Entity] with AbstractEntityMeta[Entity] {
-  properties =
-    new StringField[EntityMeta[Entity]] {
+class MetaObjectMeta(implicit context: Context) extends EntityMeta[Entity] with AbstractEntityMeta[Entity] with XmlSerializableEntityMeta[Entity] {
+  fields = (fields ++ (
+    new StringField[MetaObject] {
       name = "Name"
-      override def getFrom(o: EntityMeta[Entity]) = o.name
-      override def setTo(o: EntityMeta[Entity], v: String) {o.name = v}
+      override def getFrom(o: MetaObject) = o.name
+      override def setTo(o: MetaObject, v: String) {o.name = v}
     } ::
-    new StringField[EntityMeta[Entity]] {
+    new StringField[MetaObject] {
       name = "Caption"
-      override def getFrom(o: EntityMeta[Entity]) = o.caption
-      override def setTo(o: EntityMeta[Entity], v: String) {o.caption = v}
+      override def getFrom(o: MetaObject) = o.caption
+      override def setTo(o: MetaObject, v: String) {o.caption = v}
     } ::
-      properties map (_.asInstanceOf[EntityProperty[Entity, Any]])
+    Nil)) map (_.asInstanceOf[Field[Entity, Any]])
 }
 
 object MetaObjectMeta extends MetaObjectMeta()(CompiledModelContext) {

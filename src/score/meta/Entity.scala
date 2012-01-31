@@ -65,7 +65,9 @@ trait WriteOnlyEntity extends Entity {
   }
 }
 
-trait DynamicEntity extends Entity {
+class DynamicEntity(aMeta: EntityMeta[Entity])(implicit context: Context) extends Entity {
+  def meta = aMeta
+
   protected val values = new HashMap[String, Any]
 
   override def apply(fieldName: String) = applyDynamic(fieldName)
@@ -73,12 +75,8 @@ trait DynamicEntity extends Entity {
 
   def applyDynamic(fieldName: String) = values(fieldName)
   def updateDynamic(fieldName: String, v: Any) {values.put(fieldName, v)}
-}
-
-class RunTimeEntity(aMeta: EntityMeta[Entity])(implicit context: Context) extends Entity {
-  def meta = aMeta
 
   protected def validate() {
-    // todo
+    Model.NotImplementedYet
   }
 }

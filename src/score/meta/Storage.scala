@@ -11,6 +11,8 @@ abstract class Storage(protected val objectContext: Context)(implicit context: C
   def updateObject(o: Entity);
 
   def deleteObject(o: Entity);
+
+  def meta = Model.NotImplementedYet
 }
 
 trait ReadOnlyStorage extends Storage {

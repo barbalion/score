@@ -4,13 +4,13 @@ import xml.Elem
 
 class Model {
   protected var fEntities: List[EntityMeta[Entity]] = Nil;
-  protected var fStorages: List[Storage] = Nil;
-  protected var fProperties: List[EntityProperty[Entity, Any]] = Nil;
 
   def entities = fEntities
 }
 
 object Model {
+  def NotImplementedYet = sys.error("Not implemeted yet")
+
   def loadFromCatalog(catalogFile: String): Model = {
     val xmlStorage = new XmlStorage(CompiledModelContext, catalogFile, el => el \\ "Model" \ "_" map (_.asInstanceOf[Elem]))(SystemContext)
     loadFromStorage(xmlStorage);
@@ -33,9 +33,10 @@ object CompiledModel extends Model {
 }
 
 object CompiledModelStorage extends Storage(CompiledModelContext)(SystemContext) with WriteOnlyStorage {
-  def deleteObject(o: Entity) = null //todo
+  def deleteObject(o: Entity) = Model.NotImplementedYet
 
-  def insertObject(o: Entity) = null
+  def insertObject(o: Entity) = Model.NotImplementedYet
 
-  def updateObject(o: Entity) = null
+  def updateObject(o: Entity) = Model.NotImplementedYet
 }
+

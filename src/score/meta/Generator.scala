@@ -15,16 +15,17 @@ class Generator(templateGroup: String, templateNames: List[String]){
   private val out = new FileSwitchWriter(new OutputStreamWriter(Console.out))
 
   private class FileSwitchWriter(val defaultWriter: Writer) extends Writer {
-    val bufferedThis = new BufferedWriter(FileSwitchWriter.this,
-      1000 // todo
-    )
+    val bufferedThis = new BufferedWriter(FileSwitchWriter.this)
     val STWriter = new NoIndentWriter(bufferedThis)
 
     var currentWriter = defaultWriter;
 
     def switchTo(aWriter: Writer) {
       bufferedThis.flush();
-      if (!(currentWriter eq defaultWriter)) currentWriter.close()
+
+      if (!(currentWriter eq defaultWriter))
+        currentWriter.close()
+
       currentWriter = if (aWriter eq null) defaultWriter else aWriter
     }
 
@@ -77,8 +78,12 @@ class ScoreModelAdapter extends ObjectModelAdaptor {
     val m = Misc.getMethod(c, propertyName)
     if (m == null)
       super.lookupMethod(o, propertyName, value, c)
-    else
-      Misc.invokeMethod(m, o, value)
+    else {
+      Misc.invokeMethod(m, o, value) match {
+        case seq: Seq[Any] => scala.collection.JavaConversions.seqAsJavaList(seq)
+        case v => v
+      }
+    }
   }
 }
 

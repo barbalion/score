@@ -19,7 +19,7 @@ class XmlStorage(objectContext: Context,
   }
 
   private def convertFileMaskToRegex(mask: String): String = {
-    ("^" + mask.replaceAll("([\\.\\(\\)\\+])", "\\\\$1").replaceAllLiterally("*", ".*").replaceAllLiterally("?", ".") + "$") // replace wilcards
+    ("^" + mask.replaceAll("([\\.\\(\\)\\+])", "\\\\$1").replaceAllLiterally("*", ".*").replaceAllLiterally("?", ".") + "$") // replace wildcards
       .replaceAllLiterally("^.*", "").replaceAllLiterally(".*$", "") // remove ignorant sequences
   }
 
@@ -38,32 +38,30 @@ class XmlStorage(objectContext: Context,
     findFiles(root) filter (_.canRead)
   }
 
-  protected def entityMetaFromElem(el: Elem) = {
-    (objectContext.model.entities find (_.xmlName == el.label)).getOrElse(sys.error("Metadata for \"%s\" element not found." format (el.label)))
-  }
-
-  def createEntityFromElem(el: Elem) = {
-    val meta = entityMetaFromElem(el)
-    val o = meta.newObject(objectContext)
-    meta.properties map (p => {
-      if (p.isInstanceOf[XmlSerializableProperty[Entity, Any]])
-        p.asInstanceOf[XmlSerializableProperty[Entity, Any]].setFromXml(o, el)
-      else
-        sys.error("Property does not support xml serialization: %s" format (p.toString))
-    })
-    o
-  }
-
   override protected def objects() = synchronized({
     // create object stream for each file
     val xmlStreams = allFiles map (file => {
       // map elements to entities
       val xml = XML.load(new FileInputStream(file))
       val elements = if (elemSelector == null) xml :: Nil else elemSelector(xml)
-      elements map (elem => createEntityFromElem(elem))
+      elements map (elem => XmlStorage.createObjectFromXml(elem, objectContext))
     })
 
     // concatenate all streams into one
     xmlStreams reduceLeft (_ ++ _)
   })
+}
+
+object XmlStorage {
+  def entityMetaFromElem(el: Elem, objectContext: Context) = {
+    val meta = (objectContext.model.entities find (_.xmlName == el.label)).getOrElse(sys.error("Metadata for \"%s\" element not found." format (el.label)))
+    if (!meta.isInstanceOf[XmlSerializableEntityMeta[Entity]])
+      sys.error("Entity does not support xml serialization: %s" format (meta))
+    meta.asInstanceOf[XmlSerializableEntityMeta[Entity]]
+  }
+
+  def createObjectFromXml(el: Elem, objectContext: Context) = {
+    entityMetaFromElem(el, objectContext).newObjectFromXml(el, objectContext)
+  }
+
 }

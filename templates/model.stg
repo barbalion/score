@@ -1,6 +1,6 @@
 group Model;
 
 Main(o, timestamp) ::= <<
-< o: {e | "<e.name>"=<e>,
+< o: {e | "<e.name>"=<e> : (<e.fields: {f | <f.name>,}>),
 }>
 >>
