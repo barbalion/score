@@ -1,0 +1,6 @@
+<Model>
+  <Entity name="Test">
+    <String name="F1"/>
+    <String name="F2"/>
+  </Entity>
+</Model>
