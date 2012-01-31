@@ -1,0 +1,135 @@
+group Meta;
+import "common.stg"
+import "std_domains.stg"
+
+Entity(e) ::= <<
+<setOutput(({gen/<e.module; format="Lower EscapeSourceIdents">/gen<e.packagge.tokens: {t|/<t; format="Lower EscapeSourceIdents">}>/<EntityName(e)>.scala}))><EntityHeader(e)>
+
+<EntityClass(e)>
+
+<EntityMeta(e)>
+<resetOutput()> >>
+
+EntityHeader(e) ::= <<
+package <EntityGenPackageName(e)>
+
+<EntityImports(e)>
+>>
+
+EntityImports(e) ::= <<
+import score._
+import score.meta.fields.Field
+import score.meta._
+import score.meta.model._
+import score.meta.std.fields._
+import score.xml._
+>>
+
+EntityClass(e) ::= <<
+<EntityClassDef(e)> extends <EntityExtends(e)>{
+  <EntityMetaProperty(e)>
+
+  <FieldAccessors(e)>
+}
+>>
+
+EntityClassDef(e) ::= <<
+<if (e.isAbstract)>abstract <endif>class <EntityName(e)><if (e.genClassParams)><(e.genClassParams)(e)><endif>(implicit context: Context)
+>>
+
+EntityExtends(e) ::= "<if (e.customMetaFor)><EntityMetaObjectRefName(e.customMetaFor.extendz)><else><if (e.extendz)><ExtendEntity(e.extendz, e)><else>score.meta.Entity<endif><endif> "
+
+ExtendEntity(a, d) ::= "<EntityRefName(a)><if (a.genClassExtendParams)><(a.genClassExtendParams)(d)><endif>"
+
+EntityMetaProperty(e) ::= "override def meta: score.meta.EntityMeta = <EntityMetaObjectRefName(e)>"
+
+FieldAccessors(e) ::= <<
+<e.fields: {f | <(f.meta.genDef)(e, f)>}; separator="\n\n">
+>>
+
+FieldDef(e, f) ::= <<
+var <RawFieldName(f)>: <FieldSourceType(f)> = <if (f.defaultValue)><(f.meta.genValue)(f.defaultValue, f)><else><(f.meta.genInitValue)(f)><endif>
+def <FieldName(f)> = <RawFieldName(f)>
+def <FieldName(f)>_=(v: <FieldSourceType(f)>) {<RawFieldName(f)> = v; setFieldState({<FieldStateName(f)> = _})}
+var <FieldStateName(f)> = Field.State.Init
+>>
+
+FieldSourceType(f) ::= <<
+<if (f.genSourceType)><(f.genSourceType)("", f)><else><if (f.meta.genSourceType)><(f.meta.genSourceType)(f, f.meta)><else>Any<endif><endif>
+>>
+
+FieldValues(o) ::= <<
+<o.meta.fields: {f | <FieldValue(o, f)>}>
+>>
+
+FieldValue(o, f) ::= <<
+<if (!DefaultValueMap.(o.(FieldStateName(f))))>
+this.<FieldName(f)> = <if (!DefaultValueMap.(f.("state_genValue")))><(f.genValue)(o.(FieldName(f)), f)><else><(f.meta.genValue)(o.(FieldName(f)), f)><endif><endif>
+>>
+
+DefaultValueMap ::= [
+  "Init" : "true",
+  "Default" : "true"
+]
+
+EntityMeta(e) ::= <<
+<EntityMetaClass(e)>
+
+<EntityMetaObject(e)>
+>>
+
+EntityMetaClass(e) ::= <<
+abstract class <EntityMetaObjectName(e)>(implicit context: Context) extends <EntityMetaClassExtends(e)> with XmlSerializableEntityMeta {
+  <FieldValues(e)>
+}
+>>
+
+EntityMetaClassExtends(e) ::= <<
+<if (e.customMeta)><EntityRefName(e.customMeta)><else><if (e.extendz)><EntityMetaObjectRefName(e.extendz)><else>score.meta.EntityMeta<endif><endif>
+>>
+
+FieldsMeta(fs, fm) ::= <<
+fields<if (e.fields)>
+
+private lazy val <FieldsContextName(fm)> = new DetailContext(this)
+
+<fs: {f | <FieldMeta(fm, f)>}; separator="\n\n">
+
+fields = fields ++ Seq(<e.fields: {f | <FieldMetaName(f)>}; separator=", ">)
+<endif>
+>>
+
+FieldsContextName(f) ::= "<FieldName(f)>Context"
+
+FieldMeta(fm, f) ::= <<
+val <FieldMetaName(f)> = <(f.meta.genConstructor)(f)>()(<FieldsContextName(fm)>) {
+  override def init(): Unit = {
+    super.init()
+    setAllFieldState(Field.State.Default)
+    <FieldValues(f)>
+  }
+
+  <FieldAccessFunctions(f.master, f)>
+}
+>>
+
+FieldMetaName(f) ::= "_<FieldName(f)>"
+
+FieldAccessFunctions(e, f) ::= <<
+override def getFrom(o: <EntityClassRef(e)>) = o.<FieldName(f)>
+override def setTo(o: <EntityClassRef(e)>, v: <FieldSourceType(f)>) {o.<FieldName(f)> = v}
+override def getStateFrom(o: <EntityClassRef(e)>) = o.<FieldStateName(f)>
+override def setStateIn(o: <EntityClassRef(e)>, state: Field.State.Value) = o.<FieldStateName(f)> = state
+>>
+
+EntityMetaObject(e) ::= <<
+object <EntityMetaObjectName(e)> extends <EntityMetaObjectRefName(e)>()(CompiledModelContext) {
+  override def newObject(implicit objectContext: Context)<if (!e.isAbstract)>: <EntityClassRef(e)><endif> = <if (e.isAbstract)>throw new IllegalOperation("Cannot instantiate abstract entity.")<else>new <EntityClassRef(e)>()(objectContext)<endif>
+
+  CompiledModel.registerEntity(this)
+}
+>>
+
+EntityClassRef(e) ::= <<
+<EntityRefName(e)><if (e.genClassRefParams)><(e.genClassRefParams)(e)><endif>
+>>

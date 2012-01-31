@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!DOCTYPE hrc PUBLIC "-//Cail Lomecb//DTD Colorer HRC take5//EN" "http://colorer.sf.net/2003/hrc.dtd">
+<hrc version="take5" xmlns="http://colorer.sf.net/2003/hrc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://colorer.sf.net/2003/hrc http://colorer.sf.net/2003/hrc.xsd">
+
+	<prototype name="ST4" group="main" description="StringTemplate v4">
+		<filename>/\.stg$/i</filename>
+	</prototype>
+
+	<type name="ST4">
+		<import type="def"/>
+
+		<scheme name="ST4">
+			<inherit scheme="st"/>
+		</scheme>
+
+		<scheme name="Template">
+			<regexp match="/\\\\/" region="def:String"/>
+			<block start="/(\&lt;\!)/" end="/(\!&gt;)/" scheme="def:Comment" region00="def:Comment" region01="def:PairStart" region10="def:Comment" region11="def:PairEnd" region="def:Comment"/>
+			<regexp match="/\\\&lt;/" region="def:String"/>
+			<regexp match="/\\\&gt;/" region="def:String"/>
+			<block start="/(\&lt;)/" end="/(\&gt;)/" scheme="TemplateCode" region00="def:Symbol" region01="def:PairStart" region10="def:Symbol" region11="def:PairEnd" region="def:Text" priority="low"/>
+			<keywords region="def:Error">
+				<symb name="&lt;"/>
+				<symb name="&gt;"/>
+			</keywords>
+
+			<block start="/(\{)/" end="/(\})/" scheme="Template" region00="SymbolStrong" region01="PairStart" region10="SymbolStrong" region11="PairEnd" priority="low"/>
+			<block start="/(\()/" end="/(\))/" scheme="Template" region00="Symbol" region01="PairStart" region10="Symbol" region11="PairEnd" priority="low"/>
+			<block start="/(\[)/" end="/(\])/" scheme="Template" region00="Symbol" region01="PairStart" region10="Symbol" region11="PairEnd" priority="low"/>
+		</scheme>
+
+		<scheme name="TemplateCode">
+			<block start="/(\{)(.*?\|)?/" end="/(\})/" scheme="Template" region00="def:Symbol" region01="def:PairStart" region02="def:Text" region10="def:Symbol" region11="def:PairEnd" region="def:String"/>
+			<keywords region="def:Symbol">
+				<symb name="||"/>
+				<symb name="="/>
+				<symb name="&amp;&amp;"/>
+				<word name="elseif"/>
+				<word name="else"/>
+				<word name="if"/>
+				<word name="endif"/>
+			</keywords>
+			<inherit scheme="TemplateCodeLim"/>
+		</scheme>
+
+		<scheme name="TemplateCodeLim">
+			<inherit scheme="CString"/>
+			<keywords region="def:Error">
+				<symb name="&lt;"/>
+				<symb name="&gt;"/>
+			</keywords>
+			<inherit scheme="PairedBrackets">
+				<virtual scheme="PairedBrackets" subst-scheme="TemplateCode"/>
+			</inherit>
+		</scheme>
+
+		<scheme name="st">
+			<block start="/(\:\:\=)\s*(\&lt;\&lt;)/" end="/(\&gt;\&gt;)/" scheme="Template" region00="def:Symbol" region01="def:Symbol" region02="def:PairStart" region10="def:Symbol" region11="def:PairEnd" region="def:String"/>
+			<block start="/(\:\:\=)\s*(\&lt;\%)/" end="/(\%&gt;)/" scheme="Template" region00="def:Symbol" region01="def:Symbol" region02="def:PairStart" region10="def:Symbol" region11="def:PairEnd" region="def:String"/>
+			<block start='/(\:\:\=)\s*(\")/' end='/(\")\s*$/' scheme="Template" region00="def:Symbol" region01="def:Symbol" region02="def:PairStart" region10="def:Symbol" region11="def:PairEnd" region="def:String"/>
+
+			<regexp match="/\/\/.*$/" region0="Comment"/>
+
+			<keywords region="def:Symbol">
+				<word name="group"/>
+				<word name="import"/>
+				<word name="default"/>
+				<word name="super"/>
+				<symb name=";"/>
+				<symb name=":"/>
+				<symb name=","/>
+				<word name="::="/>
+				<word name="&lt;&lt;"/>
+			</keywords>
+
+			<inherit scheme="def:PairedBrackets">
+				<virtual scheme="def:PairedBrackets" subst-scheme="st"/>
+			</inherit>
+
+			<inherit scheme="CString"/>
+
+			<regexp match="/(^(\@[\w]+\.)?([\w]+))/" region1="def:Label"/>
+
+			<regexp match="/[^\d\w\s]/" region="def:Error" priority="low"/>
+		</scheme>
+	</type>
+</hrc>

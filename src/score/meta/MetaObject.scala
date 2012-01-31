@@ -1,65 +1,42 @@
 package score.meta
 
-import xml.Elem
+import score.Context
+import score.xml.XmlSerializable
 
-abstract class MetaObject(implicit context: Context) extends Entity with XmlSerializable {
-  var name: String = null;
+abstract class MetaObject(implicit context: Context) extends score.gen.meta.MetaObject with XmlSerializable {
 
-  var caption: String = name;
-
-  var sourceName = () => formatSourceName(name);
-
-  protected def formatSourceName(s: String) = MetaObject.formatSourceName(s)
-
-  override def validate() {};
-
-  override def xmlName = MetaObject.formatXmlName(name);
-}
-
-trait XmlSerializable extends Entity {
-  def xmlName: String = null;
-}
-
-trait DbSerializable extends Entity {
-  var sqlName: String = null;// = MetaObject.formatSqlName(name);
+  override def xmlName = if (raw_xmlName != null) raw_xmlName else MetaObject.formatXmlName(name)
 }
 
 object MetaObject {
-  def capitalizeFirstChar(s: String)(implicit context: Context) = if (s == null) null else
-    if (s.length <= 1) s.toUpperCase(context.session.locale) else s.charAt(0).toString.toUpperCase(context.session.locale) + s.substring(1)
+  def capitalizeFirstChar(s: String)(implicit context: Context) = if (s == null) null
+  else if (s.length <= 1) s.toUpperCase(context.session.locale) else s.charAt(0).toString.toUpperCase(context.session.locale) + s.substring(1)
 
-  def decapitalizeFirstChar(s: String)(implicit context: Context) = if (s == null) null else
-    if (s.length <= 1) s.toLowerCase(context.session.locale) else s.charAt(0).toString.toLowerCase(context.session.locale) + s.substring(1)
+  def decapitalizeFirstChar(s: String)(implicit context: Context) = if (s == null) null
+  else if (s.length <= 1) s.toLowerCase(context.session.locale) else s.charAt(0).toString.toLowerCase(context.session.locale) + s.substring(1)
 
-  protected def splitIndent(s: String)(implicit context: Context) =
-    s.split(" |_|(?<=[a-z])(?=[A-Z])") map (_.toLowerCase(context.session.locale))
+  def splitIndent(s: String)(implicit context: Context) = s.split("( |_|\\-|\\.|\\,|\\;)+|(?<=[a-z])(?=[A-Z])")
 
-  protected def formatSourceName(s: String)(implicit context: Context) = if (s == null) null else
-    capitalizeFirstChar(splitIndent(s).reduceLeft({capitalizeFirstChar(_) + capitalizeFirstChar(_)}))
+  //noinspection SpellCheckingInspection
+  def escapeIdents(s: String): String = {
+    s match {
+      case "extends" => "extendz"
+      case "class" => "clazz"
+      case "package" => "packagge"
+      case "case" => "caze"
+      case "new" => "neww"
+      case "def" => "deff"
+      case "match" => "mattch"
+      case "abstract" => "abztract"
+      case other => other
+    }
+  }
 
-  protected def formatXmlName(s: String)(implicit context: Context) = formatSourceName(s)
+  def formatSourceName(s: String)(implicit context: Context) = if (s == null) null
+  else escapeIdents(capitalizeFirstChar(splitIndent(s).foldLeft("") { (a, b) => a + capitalizeFirstChar(b.toLowerCase(context.session.locale)) }))
 
-  protected def formatSqlName(s: String)(implicit context: Context) = if (s == null) null else
-    splitIndent(s).reduceLeft(_.toUpperCase(context.session.locale) + "_" + _.toUpperCase(context.session.locale));
+  def formatXmlName(s: String)(implicit context: Context) = formatSourceName(s)
 
-}
-
-class MetaObjectMeta(implicit context: Context) extends EntityMeta[Entity] with AbstractEntityMeta[Entity] with XmlSerializableEntityMeta[Entity] {
-  fields = (fields ++ (
-    new StringField[MetaObject] {
-      name = "Name"
-      override def getFrom(o: MetaObject) = o.name
-      override def setTo(o: MetaObject, v: String) {o.name = v}
-    } ::
-    new StringField[MetaObject] {
-      name = "Caption"
-      override def getFrom(o: MetaObject) = o.caption
-      override def setTo(o: MetaObject, v: String) {o.caption = v}
-    } ::
-    Nil)) map (_.asInstanceOf[Field[Entity, Any]])
-}
-
-object MetaObjectMeta extends MetaObjectMeta()(CompiledModelContext) {
-  name = "Meta Object"
-  CompiledModel.registerEntity(this)
+  def formatSqlName(s: String)(implicit context: Context) = if (s == null) null
+  else splitIndent(s).reduceLeft(_.toUpperCase(context.session.locale) + "_" + _.toUpperCase(context.session.locale))
 }

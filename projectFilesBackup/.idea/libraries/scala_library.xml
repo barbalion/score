@@ -1,0 +1,23 @@
+<component name="libraryTable">
+  <library name="scala-library">
+    <CLASSES>
+      <root url="file://C:/Program Files (x86)/scala/lib" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://C:/Program Files (x86)/scala/api/jars/scala-xml_2.11-1.0.2-javadoc.jar!/" />
+      <root url="jar://C:/Program Files (x86)/scala/api/jars/scala-library-2.11.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/asm" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/repl" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/jline/src/main/java" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/jline/src/test/java" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/actors" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/library" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/forkjoin" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/partest-extras" />
+      <root url="file://$PROJECT_DIR$/../2 scala/scala/src/partest-javaagent" />
+    </SOURCES>
+    <jarDirectory url="file://C:/Program Files (x86)/scala/lib" recursive="false" />
+  </library>
+</component>

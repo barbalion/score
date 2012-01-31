@@ -1,6 +1,18 @@
 group Model;
+import "common.stg"
 
-Main(o, timestamp) ::= <<
-< o: {e | "<e.name>"=<e> : (<e.fields: {f | <f.name>,}>),
-}>
->>
+Model(entities) ::= <<
+<setOutput(({gen/score/gen/MetaModel.scala}))>package score.gen
+
+import score.gen._
+
+object MetaModel {
+  // init model
+  Seq(
+    <entities: {e | <EntityMetaObjectRefName(e)>}; separator=",\n">
+  ) foreach {
+    _.init()
+  }
+}
+<resetOutput()> >>
+

@@ -1,8 +1,127 @@
+﻿<?xml version="1.0"?>
 <Model>
-	<Entity name="Test">
+	<!--Entity name="Entity" caption="The very base entity of Score" module="Score" isAbstract="true" customized="true" customizedMeta="true"/-->
+
+	<Entity name="Name Key Entity" isAbstract="true" module="Score" package="Meta">
 		<Fields>
-			<String name="F1"/>
-			<String name="F2"/>
+			<String name="Name" required="true" isKey="true" hint="The name of the object. It must be unique within the scope. Can contain almost any characters including spaces and punctuation."/>
 		</Fields>
 	</Entity>
+
+	<Entity name="Meta Object" hint="Ancestor for all model meta objects in Score" isAbstract="true" extends="Name Key Entity" customized="true" module="Score" package="Meta">
+		<Fields>
+			<String name="Caption" hint="Human-readable caption as it will be known by a user. By default equals to Name."/>
+			<String name="Hint" hint="A message (like this one) to be shown as a hint about the meta object."/>
+			<String name="Source Name" hint="Name of the meta object in your generated sources. By default is equal to the Name. Spaces, underscores and other signs will split the name into tokens and then tokens will combine resulting Name for your sources."/>
+			<String name="Source Meta Name" hint="Similar to Source Name but this name is for meta object. By default equals to Source Name plus 'Meta'."/>
+			<String name="Xml Name" hint="Name of xml nodes to store the field value. By default is equal to source field name. You can override it with your own implementation here."/>
+		</Fields>
+	</Entity>
+
+	<Entity name="Entity Meta" hint="Score Entity Definition" extends="Meta Object" xmlName="Entity" customized="true" module="Score" package="Meta">
+		<Fields>
+			<String name="Module" required="true" hint="Name of the module which meta object belongs to."/>
+			<String name="Package" hint="Package name inside the module."/>
+			<Ref name="Extends" to="Entity Meta" required="true" defaultValue="Entity" hint="The name of ancestor meta object. 'Entity' is the root and default value."/>
+			<Boolean name="Comparable" hint="Wheather the entity's objects are comparable with each other. False by default."/>
+			<Boolean name="Customized" hint="Wheather the entity's object has custom source class overriding."/>
+			<Boolean name="Customized Meta" hint="Wheather the entity's object has custom source meta class overriding."/>
+
+			<Ref name="Custom Meta" to="Entity Meta" hint="The name of custom meta object for this entity. Must be used with 'Custom Meta For' on other side."/>
+			<Ref name="Custom Meta For" to="Entity Meta" hint="The name of customized meta object. Must be used with 'Custom Meta' on other side."/>
+
+			<String name="Gen Constructor" hint="" defaultValue="MetaObjectConstructor"/>
+			<String name="Gen Class Params" hint=""/>
+			<String name="Gen Class Ref Params" hint=""/>
+			<String name="Gen Class Extend Params" hint=""/>
+
+			<Boolean name="Is Abstract" hint="Wheather the entity is only abstract superclass for descendants or not. Abstract entities cannot be instantiated."/>
+			<!--List of="Used Entities" name="Use" hint="List of used entities."/-->
+			<List of="Field" name="Fields" hint="List of features." genValue="FieldsMeta"/>
+		</Fields>
+	</Entity>
+
+	<Entity name="Field Meta" hint="Score Field Meta Object" extends="Entity Meta" xmlName="Field" module="Score" package="Meta" customMetaFor="Field" >
+		<Fields>
+			<String name="Gen Source Type" hint=""/>
+			<String name="Gen Def" hint="" defaultValue="FieldDef"/>
+			<String name="Gen Meta Def" hint="" defaultValue="FieldMeta"/>
+			<String name="Gen Init Value" hint="" defaultValue="FieldInitValue"/>
+			<String name="Gen Value" hint="" defaultValue="InlineValue"/>
+		</Fields>
+	</Entity>
+
+	<!--Entity name="Used Entity" hint="Score Entity Field Meta Object." extends="Meta Object" isAbstract="true" >
+		<Fields>
+			<Ref name="Entity" to="Entity Meta" required="true" hint="The name of Entity Meta." />
+		</Fields>
+	</Entity>
+
+	<Entity name="Use Trait Entity" hint="" extends="Used Entity"/>
+	<Entity name="Use Clone Entity" hint="" extends="Used Entity"/>
+	<Entity name="Use Expand Entity" hint="" extends="Used Entity"/>
+
+	<Entity name="Used Entities" hint="Reference for using of traits in Entity definition." isAbstract="true" >
+		<Fields>
+			<List of="Used Entity" name="Entities" hint="List of used entities."/>
+		</Fields>
+	</Entity-->
+
+	<!--Entity name="Entity Feature" hint="Score Entity Feature Object." extends="Meta Object" isAbstract="true" >
+	</Entity-->
+
+	<Entity name="Field" hint="Score Field Object." customized="true" customMeta="Field Meta" extends="Meta Object" isAbstract="true" xmlName="FieldStd" genConstructor="FieldMetaConstructor" genClassParams="FieldClassParams" genClassRefParams="FieldClassRefParams" genClassExtendParams="FieldClassExtendParams" module="Score" package="Meta Fields">
+		<Fields>
+			<String name="Gen Value" hint="" defaultValue="InlineValue"/>
+			<!--String name="Gen Value" hint="" defaultValue="InlineValue"/-->
+			<Boolean name="Is Key" hint="The field is a part of primary key."/>
+			<Boolean name="Read-Only" hint="Defines the ability to set the field value."/>
+			<Boolean name="Required" hint="The field must have non-empty value for the object to validated."/>
+			<!--String name="Output Format" hint="A format to output the value."/>
+			<String name="Print Format" hint="A format to output the value in reports."/-->
+		</Fields>
+	</Entity>
+
+	<Field name="Simple Value Field" isAbstract="true" hint="An abstract ancestor for all fields that can store value as single object." extends="Field" genSourceType="TypedSourceType" genClassParams="FieldClassParams" genClassRefParams="FieldClassRefParams" genClassExtendParams="FieldClassExtendParams" customized="true" module="Score" package="Meta Fields">
+		<Fields/>
+	</Field>
+
+	<Field name="Comparable Simple Value Field" extends="Simple Value Field" isAbstract="true" hint="An abstract ancestor for all comparable single value fields." genSourceType="TypedSourceType" genClassParams="ComparableSimpleValueFieldClassParams" genClassExtendParams="FieldClassExtendParams" customized="true" module="Score" package="Meta Fields">
+		<Fields/>
+	</Field>
+
+	<Field name="String Field" extends="Comparable Simple Value Field" xmlName="String" genSourceType="StringSourceType" genValue="StringValue" genClassParams="StdFieldClassParams" genClassRefParams="StdFieldClassRefParams" genClassExtendParams="StdFieldClassExtendParams" customized="true" module="Score" package="Meta Std Fields" isAbstract="false">
+		<Fields>
+			<!--Integer name="Max Lenght" hint="A maximum allowed lenght of the field. Zero means no limit."/>
+			<Integer name="Min Lenght" hint="A minimum allowed lenght of the field. Zero means no limit."/-->
+			<String name="Edit Mask" hint="A mask for an editor."/>
+			<String name="Default Value" hint="Default value of the field"/>
+			<Ref name="Test" to="Entity Meta"/>
+		</Fields>
+	</Field>
+
+	<Field name="Boolean Field" extends="Simple Value Field" xmlName="Boolean" genSourceType="BooleanSourceType" genInitValue="BooleanInitValue" genClassParams="StdFieldClassParams" genClassRefParams="StdFieldClassRefParams" genClassExtendParams="StdFieldClassExtendParams" customized="true" module="Score" package="Meta Std Fields" isAbstract="false">
+		<Fields/>
+	</Field>
+
+	<Field name="Integer Field" extends="Comparable Simple Value Field" xmlName="Int" module="Score" package="Meta Std Fields" genSourceType="IntSourceType" genClassParams="StdFieldClassParams" genClassRefParams="StdFieldClassRefParams" genClassExtendParams="StdFieldClassExtendParams" customized="true" genInitValue="NumericInitValue" isAbstract="false">
+		<Fields>
+			<Int name="Max" hint="A maximum allowed value of the field. Zero means no limit."/>
+			<Int name="Min" hint="A minimum allowed value of the field. Zero means no limit."/>
+			<String name="Edit Mask" hint="A mask for an editor."/>
+			<Int name="Default Value" hint="Default value of the field"/>
+		</Fields>
+	</Field>
+
+	<Field name="Ref Field" extends="Simple Value Field" xmlName="Ref" genConstructor="RefFieldMetaConstructor" genValue="RefValue" genSourceType="RefSourceType" genClassParams="RefFieldClassParams" genClassRefParams="RefFieldClassRefParams" genClassExtendParams="StdFieldClassExtendParams" customized="true" module="Score" package="Meta Std Fields" isAbstract="false">
+		<Fields>
+			<Ref name="to" to="Entity Meta" required="true" hint="The name of referred entity."/>
+		</Fields>
+	</Field>
+
+	<Field name="List Field" extends="Simple Value Field" xmlName="List" genConstructor="ListFieldMetaConstructor" genValue="ListValue" genInitValue="ListInitValue" genSourceType="ListSourceType" genClassParams="ListFieldClassParams" genClassRefParams="ListFieldClassRefParams" genClassExtendParams="StdFieldClassExtendParams" customized="true" module="Score" package="Meta Std Fields" isAbstract="false">
+		<Fields>
+			<Ref name="of" to="Entity Meta" required="true" hint="The name of referred entity."/>
+		</Fields>
+	</Field>
 </Model>

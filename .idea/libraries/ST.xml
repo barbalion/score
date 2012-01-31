@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="ST">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/antlr-3.3-complete.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/ST-4.0.8.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../2 scala/stringtemplate4/src" />
+    </SOURCES>
+  </library>
+</component>

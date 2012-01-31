@@ -1,0 +1,10 @@
+group Model;
+import "common.stg"
+import "model.stg"
+import "entity.stg"
+
+Main(entities, timestamp) ::= <<
+ - Generating Model <Model(entities)>
+ - Generating Entities: 
+<entities: {e |  --- generating "<e.name>"<Entity(e)>}; separator="\n">
+>>

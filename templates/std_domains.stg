@@ -1,0 +1,56 @@
+group std_domains;
+import "common.stg"
+
+// Class Params
+FieldClassParams(e) ::= "[E \<: Entity, T]"
+ComparableSimpleValueFieldClassParams(e) ::= "[E \<: Entity, T \<: Comparable[T]]"
+StdFieldClassParams(e) ::= "[E \<: Entity]"
+RefFieldClassParams(e) ::= "[E \<: Entity, T \<: score.meta.Entity]"
+ListFieldClassParams(e) ::= "[E \<: Entity, T \<: Entity]"
+
+FieldClassExtendParams(e) ::= "[E, <FieldSourceType(e)>]"
+StdFieldClassExtendParams(e) ::= "[E]"
+
+FieldClassRefParams(e) ::= "[Entity, Any]"
+StdFieldClassRefParams(e) ::= "[Entity]"
+RefFieldClassRefParams(e) ::= "[Entity, score.meta.EntityMeta]"
+ListFieldClassRefParams(e) ::= "[Entity, score.meta.Entity]"
+
+// Source Types
+TypedSourceType(f, fm) ::= "T"
+StringSourceType(f, fm) ::= "String"
+BooleanSourceType(f, fm) ::= "Boolean"
+IntSourceType(f, fm) ::= "Integer"
+RefSourceType(f, fm) ::= "Ref[<if (f.name)><EntityClassRef(f.to)><else>T<endif>]"
+ListSourceType(f, fm) ::= "Seq[<if (f.name)><EntityClassRef(f.of)><else>T<endif>]"
+
+// Constructorms for field meta object
+FieldMetaConstructor(f) ::= "new <EntityRefName(f.meta)>[<EntityClassRef(f.master)>]"
+ListFieldMetaConstructor(f) ::= "new <EntityRefName(f.meta)>[<EntityClassRef(f.master)>, <EntityClassRef(f.of)>]"
+RefFieldMetaConstructor(f) ::= "new <EntityRefName(f.meta)>[<EntityClassRef(f.master)>, <EntityClassRef(f.to)>]"
+
+// Init values
+FieldInitValue(f) ::= "null"
+BooleanInitValue(f) ::= "false"
+ListInitValue(f) ::= "Nil"
+NumericInitValue(f) ::= "0"
+
+// Inline values (genValue property templates)
+InlineValue(v, f) ::= <<
+<v; null="null">
+>>
+StringValue(v, f) ::= <<
+<if (v)>"<v; format="EscapeCString">"<else>null<endif>
+>>
+RefValue(v, f) ::= "<EntityMetaObjectRefName(v)>"
+ListValue(v, f) ::= <<
+Seq(
+  <v: NewObjectValue(); separator=",\n">
+)
+>>
+
+NewObjectValue(v) ::= <<
+<(v.genConstructor)(v)> {
+  <FieldValues(v)>
+}
+>>
