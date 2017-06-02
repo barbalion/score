@@ -1,7 +1,6 @@
 package score.gen.meta.fields
 
 import score._
-import score.meta.fields.Field
 import score.meta._
 import score.meta.model._
 import score.meta.std.fields._

@@ -10,17 +10,17 @@ import score.xml._
 class EntityMeta(implicit context: Context) extends score.meta.MetaObject {
   override def meta: score.meta.EntityMeta = score.gen.meta.EntityMetaMeta
 
-  var raw_module: String = null
-  def module = raw_module
+  var raw_module: String = _
+  def module: String = raw_module
   def module_=(v: String) {raw_module = v; setFieldState({state_module = _})}
   var state_module = Field.State.Init
 
-  var raw_packagge: String = null
-  def packagge = raw_packagge
+  var raw_packagge: String = _
+  def packagge: String = raw_packagge
   def packagge_=(v: String) {raw_packagge = v; setFieldState({state_packagge = _})}
   var state_packagge = Field.State.Init
 
-  var raw_extendz: Ref[score.meta.EntityMeta] = null
+  var raw_extendz: Ref[score.meta.EntityMeta] = _
   def extendz = raw_extendz
   def extendz_=(v: Ref[score.meta.EntityMeta]) {raw_extendz = v; setFieldState({state_extendz = _})}
   var state_extendz = Field.State.Init
