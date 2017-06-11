@@ -32,7 +32,7 @@ class LoadedObjectRef[A <: Entity](val obj: A) extends Ref[A]() {
 
 class KeyRef[A <: Entity](meta: EntityMeta, key: Condition, objectContext: Context) extends Ref[A]() {
   override def apply(): A = objectContext.storage.list(meta, key) match {
-    case Nil => sys.error("Object not found.")
+    case Nil => sys.error("Object \"%s\" not found (%s)." format (meta.name, key.toString))
     case head :: tail :: _ => sys.error("Too many objects found for key \"%s\"." format key)
     case o :: _ => o.asInstanceOf[A]
   }
